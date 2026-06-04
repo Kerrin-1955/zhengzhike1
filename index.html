@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>廉政风险排雷 · 全面从严治党互动课堂</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 避免课堂拖动文字，不影响点击 */
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', '思源宋体', '宋体', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(145deg, #9b1d1d 0%, #7a0e0e 40%, #4e0404 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* 背景红色绸缎/光晕效果 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 40%, rgba(255, 215, 0, 0.08) 0%, rgba(255, 80, 40, 0.05) 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 粒子点阵模拟庄严星光 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image: radial-gradient(2px 2px at 10% 20%, rgba(255, 200, 100, 0.3) 1px, transparent 1px),
+                              radial-gradient(1px 1px at 80% 70%, rgba(255, 210, 90, 0.4) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px;
+        }
+
+        /* 主容器卡片风格 */
+        .game-container {
+            width: 100%;
+            max-width: 1300px;
+            background: rgba(255, 248, 235, 0.92);
+            border-radius: 48px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 215, 0, 0.4);
+            overflow: hidden;
+            backdrop-filter: blur(1px);
+            transition: all 0.2s;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 页面通用样式 */
+        .page {
+            padding: 24px 28px 40px;
+            transition: 0.2s ease;
+            display: none;
+        }
+
+        .active-page {
+            display: block;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 顶部课堂标识 */
+        .class-badge {
+            text-align: right;
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: #c02b2b;
+            border-bottom: 1px solid #f3cf9a;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #fff5e6, #fff0e0);
+            border-radius: 40px;
+            padding: 8px 20px;
+            display: inline-block;
+            width: auto;
+        }
+
+        /* 标题区 */
+        .title-main {
+            font-size: 3rem;
+            font-weight: 800;
+            text-align: center;
+            background: linear-gradient(135deg, #a1220a, #dc4c1a, #f7b42c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 10px rgba(160, 40, 0, 0.2);
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #a5311a;
+            border-top: 2px solid #f7cf99;
+            border-bottom: 2px solid #f7cf99;
+            display: inline-block;
+            width: auto;
+            margin: 0 auto 20px;
+            padding: 6px 24px;
+            background: #fff7ef;
+            border-radius: 60px;
+        }
+
+        /* 卡片网格 */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 22px;
+            margin: 30px 0 20px;
+        }
+
+        .card {
+            background: #fffef7;
+            border-radius: 28px;
+            padding: 20px 16px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #2c1810;
+            box-shadow: 0 8px 20px rgba(100, 20, 0, 0.15);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 8px solid #e6b422;
+            position: relative;
+            backdrop-filter: blur(2px);
+            word-break: break-word;
+        }
+
+        .card.risk-cleared {
+            background: #a82e1c;
+            color: #fff0cf;
+            border-left-color: #ffd966;
+            text-decoration: line-through;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+            cursor: default;
+            opacity: 0.85;
+        }
+
+        .card.risk-cleared::after {
+            content: "✓ 已排雷";
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            font-size: 12px;
+            background: #f7c56e;
+            color: #7a2e1a;
+            padding: 2px 10px;
+            border-radius: 40px;
+            font-weight: bold;
+        }
+
+        .card:hover:not(.risk-cleared) {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.2);
+            background: #fff4e8;
+        }
+
+        /* 震动动画 */
+        .shake-card {
+            animation: shakeBox 0.25s ease-in-out 0s 2;
+        }
+
+        @keyframes shakeBox {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* 分数栏 & 提示 */
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            background: #f2e1c0;
+            padding: 12px 22px;
+            border-radius: 60px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .score-box {
+            background: #831d1d;
+            padding: 6px 18px;
+            border-radius: 40px;
+            color: #ffefb9;
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+        .level-tip {
+            font-weight: bold;
+            color: #b13b1a;
+            background: #fff1e0;
+            padding: 6px 20px;
+            border-radius: 30px;
+        }
+        .guide-text {
+            font-size: 0.9rem;
+            color: #7c471f;
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        /* 按钮 */
+        .btn {
+            display: inline-block;
+            background: white;
+            border: none;
+            padding: 12px 32px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 60px;
+            color: #b3301a;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-top: 16px;
+        }
+        .btn-primary {
+            background: #d43f1c;
+            color: white;
+            box-shadow: 0 6px 0 #732010;
+        }
+        .btn-primary:hover {
+            background: #b12c0a;
+            transform: scale(1.02);
+        }
+        .btn-outline {
+            background: #fff3e6;
+            border: 1px solid #c25936;
+            color: #b3451f;
+        }
+        .btn-outline:hover {
+            background: #ffe2cd;
+        }
+
+        /* 模态弹窗 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            backdrop-filter: blur(4px);
+        }
+        .modal.active {
+            visibility: visible;
+        }
+        .modal-content {
+            background: #fffef2;
+            max-width: 500px;
+            width: 85%;
+            border-radius: 48px;
+            padding: 30px 25px;
+            text-align: center;
+            border-top: 12px solid #da4c2a;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.4);
+        }
+
+        /* 回顾展区 */
+        .review-area {
+            margin-top: 30px;
+            background: #fcf5e8;
+            border-radius: 32px;
+            padding: 20px;
+            display: none;
+            border: 1px solid #f7cf8c;
+        }
+        .review-item {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #f3cca2;
+            padding-bottom: 14px;
+        }
+
+        /* 手机适配 */
+        @media (max-width: 700px) {
+            .page { padding: 16px; }
+            .title-main { font-size: 2rem; }
+            .cards-grid { grid-template-columns: 1fr; gap: 14px; }
+            .btn { padding: 10px 24px; font-size: 1rem; }
+        }
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 12px;
+            color: #8b5a32;
+        }
+    </style>
+</head>
+<body>
+<div class="particles"></div>
+<div class="game-container">
+    <!-- 固定课堂标识 -->
+    <div style="padding: 15px 30px 0 30px; display: flex; justify-content: space-between; align-items: center;">
+        <span style="background:#9e2a1f; color: #ffefcf; padding: 4px 18px; border-radius: 30px; font-size: 13px;">全面从严治党 · 课堂互动</span>
+        <span id="globalScoreDisplay" style="background:#451a0a; color:#ffdca8; padding: 4px 16px; border-radius: 30px; font-weight: bold;">总分: 0</span>
+    </div>
+
+    <!-- 首页 start-page -->
+    <div id="start-page" class="page active-page">
+        <div style="text-align:center; margin-top: 20px;">
+            <div class="title-main">廉政风险排雷</div>
+            <div class="subtitle">识别风险点，筑牢纪律线</div>
+            <p style="max-width: 600px; margin: 30px auto; font-size: 1.05rem; line-height: 1.5; background: rgba(255,240,220,0.8); padding: 18px; border-radius: 36px;">
+                在全面从严治党的背景下，廉政风险并不总是显而易见。请你进入不同情境，找出隐藏的风险行为，完成一次纪律意识小测试。
+            </p>
+            <button class="btn btn-primary" id="startBtn">开始排雷</button>
+        </div>
+    </div>
+
+    <!-- 规则页 -->
+    <div id="rules-page" class="page">
+        <div class="title-main" style="font-size:2rem;">游戏规则</div>
+        <div style="background:#fff7ec; border-radius: 40px; padding: 28px; margin: 20px 0;">
+            <p>📜 每一关会出现 6 张行为卡片，其中部分属于“廉政风险点”。</p>
+            <p>⚠️ 点击风险卡片即可完成“排雷”，点对一张+10分。</p>
+            <p>✅ 误点正面行为卡片 –5分（每张仅扣一次）。</p>
+            <p>🔍 每一关找出全部风险点后自动进入本关总结。</p>
+            <p>🏆 完成四关后，将根据总分生成学习评价。</p>
+            <p style="margin-top: 20px; font-weight: bold;">请认真判断，风险往往藏在细节之中。</p>
+        </div>
+        <div style="text-align:center;"><button class="btn btn-primary" id="toLevel1Btn">我已了解，开始第一关</button></div>
+    </div>
+
+    <!-- 动态关卡容器占位 -->
+    <div id="level-1" class="page level-page" data-level="0"></div>
+    <div id="level-2" class="page level-page" data-level="1"></div>
+    <div id="level-3" class="page level-page" data-level="2"></div>
+    <div id="level-4" class="page level-page" data-level="3"></div>
+
+    <!-- 结果页 -->
+    <div id="result-page" class="page">
+        <div class="title-main" style="font-size:2.2rem;">排雷完成</div>
+        <div id="resultStats" style="background:#f9eddb; border-radius: 36px; padding: 20px; margin: 16px 0;"></div>
+        <div id="finalComment" style="font-size:1.1rem; margin: 12px 0; line-height: 1.4;"></div>
+        <div style="font-style:italic; border-left: 5px solid #cf491f; background:#fff0e1; padding: 14px; margin: 20px 0;">
+            <p>全面从严治党永远在路上，党的自我革命永远在路上。</p>
+        </div>
+        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+            <button id="restartBtn" class="btn btn-outline">再玩一次</button>
+            <button id="reviewRiskBtn" class="btn btn-outline">查看风险回顾</button>
+        </div>
+        <div id="reviewContainer" class="review-area"></div>
+    </div>
+
+    <!-- 全局模态弹窗（关卡总结） -->
+    <div id="summaryModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle" style="color:#bc3a1a;">第一关完成</h3>
+            <p id="modalText" style="margin: 20px 0;">总结话语</p>
+            <button id="modalNextBtn" class="btn btn-primary">进入下一关</button>
+        </div>
+    </div>
+
+    <!-- 浮动提示toast -->
+    <div id="toastMsg" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #2c1a12e6; color: #ffebc2; padding: 10px 24px; border-radius: 50px; font-weight: bold; z-index: 1100; font-size: 0.9rem; pointer-events: none; transition: 0.2s; opacity: 0;"></div>
+</div>
+
+<script>
+    // ---------- 关卡原始数据 ----------
+    const levelsData = [
+        { // 第一关
+            name: "第一关：纪律意识排雷",
+            tip: "纪律严明是党的光荣传统和独特优势。请找出违反纪律意识和规矩意识的风险行为。",
+            cards: [
+                { text: "在重大事项上自作主张，不按程序请示报告", isRisk: true, explanation: "重大事项必须按照组织程序请示报告，不能个人擅自决定。" },
+                { text: "严格遵守组织纪律，按规定参加组织生活", isRisk: false, explanation: "这是增强组织观念和纪律意识的正确做法。" },
+                { text: "传播未经证实的小道消息，造成不良影响", isRisk: true, explanation: "传播不实信息会破坏组织纪律和政治生态。" },
+                { text: "遇到问题主动向组织汇报，接受监督", isRisk: false, explanation: "主动汇报和接受监督体现了纪律意识。" },
+                { text: "对制度规定选择性执行，合意的就执行，不合意的就拖延", isRisk: true, explanation: "选择性执行会削弱制度权威，属于纪律风险。" },
+                { text: "把个人利益置于集体利益之前，影响集体决策", isRisk: true, explanation: "个人利益凌驾于集体利益之上，容易造成纪律和作风问题。" }
+            ]
+        },
+        { // 第二关
+            name: "第二关：作风建设排雷",
+            tip: "作风问题关系人心向背。请找出隐藏在日常工作中的不良作风风险。",
+            cards: [
+                { text: "开会只重形式，不解决实际问题", isRisk: true, explanation: "形式主义会影响工作实效，损害群众获得感。" },
+                { text: "深入基层调研，倾听群众真实意见", isRisk: false, explanation: "深入基层、联系群众是优良作风的体现。" },
+                { text: "面对群众诉求互相推诿，拖延办理", isRisk: true, explanation: "推诿拖延反映出责任意识不足，是作风建设中的风险点。" },
+                { text: "发现问题及时整改，主动回应群众关切", isRisk: false, explanation: "及时整改和回应群众关切，是担当作为的表现。" },
+                { text: "材料写得漂亮，但工作落实不到位", isRisk: true, explanation: "重材料轻落实，是形式主义的典型表现。" },
+                { text: "工作中只求过得去，不求过得硬", isRisk: true, explanation: "标准不高、要求不严，容易导致工作质量下降。" }
+            ]
+        },
+        { // 第三关
+            name: "第三关：廉洁自律排雷",
+            tip: "廉洁自律是党员干部的基本底线。请找出容易引发廉政风险的行为。",
+            cards: [
+                { text: "接受管理服务对象赠送的礼品礼金", isRisk: true, explanation: "接受可能影响公正执行公务的礼品礼金，属于廉政风险。" },
+                { text: "自觉净化社交圈、生活圈、朋友圈", isRisk: false, explanation: "净化社交圈、生活圈、朋友圈有助于防范廉洁风险。" },
+                { text: "利用职务便利为亲友谋取特殊照顾", isRisk: true, explanation: "公权力不能用于谋取私人利益。" },
+                { text: "坚持公私分明，严格按制度办事", isRisk: false, explanation: "公私分明、依法依规办事，是廉洁自律的重要体现。" },
+                { text: "认为小吃小喝不是问题，逐渐放松要求", isRisk: true, explanation: "廉政风险常常从小事小节开始，必须防微杜渐。" },
+                { text: "把公共资源当作个人资源使用", isRisk: true, explanation: "公共资源必须用于公共事务，不能被私人占用。" }
+            ]
+        },
+        { // 第四关
+            name: "第四关：制度监督排雷",
+            tip: "制度的生命力在于执行。请找出破坏制度执行和监督机制的风险行为。",
+            cards: [
+                { text: "把监督看成是不信任，拒绝接受监督", isRisk: true, explanation: "监督是规范权力运行的重要保障，拒绝监督会增加风险。" },
+                { text: "让权力在阳光下运行，主动公开相关信息", isRisk: false, explanation: "公开透明有助于防止权力滥用。" },
+                { text: "制度写在纸上，实际执行时打折扣", isRisk: true, explanation: "制度执行打折扣会削弱治理效能。" },
+                { text: "发现苗头性问题及时提醒、及时纠正", isRisk: false, explanation: "抓早抓小、防微杜渐，是监督的重要作用。" },
+                { text: "面对问题不愿指出，怕得罪人，做老好人", isRisk: true, explanation: "不敢监督、不愿监督会让小问题变成大问题。" },
+                { text: "对违规行为睁一只眼闭一只眼", isRisk: true, explanation: "放任违规行为会破坏制度权威和组织纪律。" }
+            ]
+        }
+    ];
+
+    // 全局游戏状态
+    let currentPage = "start-page";
+    let totalScore = 0;
+    let correctRiskCount = 0;   // 正确排雷总数（16个满分）
+    let wrongClickCount = 0;     // 误点正面卡片总次数（仅计第一次）
+    // 存储各关卡卡片的状态
+    let levelStates = [];        // 每个元素: { cardCleared: bool[], positivePenalized: bool[] }
+    let levelCompletedFlag = [false, false, false, false]; // 是否已经完成弹出总结（避免重复弹窗）
+    let currentLevelIdx = 0;     // 0-3
+    let isWaitingForModal = false; // 防止弹窗时再次点击卡片
+
+    // 初始化状态
+    function initGameState() {
+        totalScore = 0;
+        correctRiskCount = 0;
+        wrongClickCount = 0;
+        isWaitingForModal = false;
+        updateGlobalScoreDisplay();
+        levelStates = [];
+        for (let lv = 0; lv < 4; lv++) {
+            const cards = levelsData[lv].cards;
+            const cleared = new Array(cards.length).fill(false);
+            const penalized = new Array(cards.length).fill(false);
+            levelStates.push({ cardCleared: cleared, positivePenalized: penalized });
+        }
+        for (let i = 0; i < 4; i++) levelCompletedFlag[i] = false;
+        // 重置所有关卡页面的html内容占位
+        for (let i = 0; i < 4; i++) {
+            const levelDiv = document.getElementById(`level-${i+1}`);
+            if (levelDiv) levelDiv.innerHTML = ''; 
+        }
+    }
+
+    // 渲染指定关卡
+    function renderLevel(levelIdx) {
+        const levelDiv = document.getElementById(`level-${levelIdx+1}`);
+        if (!levelDiv) return;
+        const level = levelsData[levelIdx];
+        const state = levelStates[levelIdx];
+        const cards = level.cards;
+        let html = `
+            <div class="info-bar">
+                <span class="level-tip">${level.name}</span>
+                <span class="score-box">⭐ 当前分: ${totalScore}</span>
+            </div>
+            <div class="level-tip" style="background:#f3ddbf; margin-bottom:10px;">📢 ${level.tip}</div>
+            <div class="cards-grid" id="level-grid-${levelIdx}">
+        `;
+        for (let i = 0; i < cards.length; i++) {
+            const card = cards[i];
+            const isCleared = state.cardCleared[i];
+            let additionalClass = isCleared ? "risk-cleared" : "";
+            html += `<div class="card ${additionalClass}" data-card-index="${i}" data-level="${levelIdx}">${card.text}</div>`;
+        }
+        html += `</div><div class="guide-text">⚠️ 提示：点击你认为存在风险的行为卡片</div>`;
+        levelDiv.innerHTML = html;
+        // 绑定卡片事件 (委托方式)
+        const grid = document.getElementById(`level-grid-${levelIdx}`);
+        if (grid) {
+            grid.querySelectorAll('.card').forEach(cardDiv => {
+                cardDiv.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (isWaitingForModal) return;
+                    const cardIdx = parseInt(cardDiv.dataset.cardIndex);
+                    const lv = parseInt(cardDiv.dataset.level);
+                    if (isNaN(lv) || lv !== currentLevelIdx) return;
+                    // 已经排过雷的风险卡片不可再点
+                    if (levelStates[lv].cardCleared[cardIdx]) return;
+                    const cardData = levelsData[lv].cards[cardIdx];
+                    // 正面卡片误点逻辑
+                    if (!cardData.isRisk) {
+                        // 已经扣过分则不再扣分但提示
+                        const alreadyPenalized = levelStates[lv].positivePenalized[cardIdx];
+                        if (!alreadyPenalized) {
+                            totalScore = Math.max(0, totalScore - 5);
+                            wrongClickCount++;
+                            levelStates[lv].positivePenalized[cardIdx] = true;
+                            updateGlobalScoreDisplay();
+                            showToast("❌ 这是正确做法，请继续寻找风险点。 -5分", 1500);
+                        } else {
+                            showToast("⚠️ 这是正确做法，请继续寻找风险点。", 1000);
+                        }
+                        // 震动效果
+                        cardDiv.classList.add('shake-card');
+                        setTimeout(() => cardDiv.classList.remove('shake-card'), 400);
+                        updateGlobalScoreDisplay();
+                        renderLevel(lv); // 刷新分数显示 (为了总分数刷新)
+                        return;
+                    } 
+                    // 正确排雷风险卡片
+                    if (!levelStates[lv].cardCleared[cardIdx]) {
+                        levelStates[lv].cardCleared[cardIdx] = true;
+                        totalScore += 10;
+                        correctRiskCount++;
+                        updateGlobalScoreDisplay();
+                        showToast("✅ 排雷成功！风险点已识别 +10分", 1200);
+                        // 播放红光小特效 (模拟动画)
+                        cardDiv.style.transition = "0.1s";
+                        cardDiv.style.boxShadow = "0 0 0 3px #ffb347";
+                        setTimeout(() => cardDiv.style.boxShadow = "", 300);
+                        renderLevel(lv);   // 重新渲染更新样式 "已排雷"
+                        // 检查本关所有风险是否已被全部排除
+                        checkLevelCompletion(lv);
+                    }
+                    updateGlobalScoreDisplay();
+                });
+            });
+        }
+    }
+
+    // 检查关卡是否完成所有风险排雷
+    function checkLevelCompletion(levelIdx) {
+        if (levelCompletedFlag[levelIdx]) return;
+        const state = levelStates[levelIdx];
+        const cards = levelsData[levelIdx].cards;
+        const riskIndices = cards.map((c, idx) => c.isRisk ? idx : -1).filter(i => i !== -1);
+        const allCleared = riskIndices.every(rIdx => state.cardCleared[rIdx] === true);
+        if (allCleared) {
+            levelCompletedFlag[levelIdx] = true;
+            isWaitingForModal = true;
+            // 弹出本关总结弹窗
+            let modalTitle = "", modalSummary = "", nextTarget = "";
+            switch(levelIdx) {
+                case 0: modalTitle = "第一关完成：纪律意识是底线"; modalSummary = "全面从严治党，首先要严明纪律。只有把纪律和规矩挺在前面，才能让权力运行有边界、组织生活有秩序、党员干部有敬畏。"; break;
+                case 1: modalTitle = "第二关完成：作风建设永远在路上"; modalSummary = "全面从严治党不仅要管思想、管纪律，也要管作风。反对形式主义、官僚主义，关键是把工作落到实处，把群众放在心中。"; break;
+                case 2: modalTitle = "第三关完成：清正廉洁守初心"; modalSummary = "廉洁自律不是一句口号，而是体现在每一次选择、每一个细节之中。全面从严治党要求党员干部知敬畏、存戒惧、守底线。"; break;
+                case 3: modalTitle = "第四关完成：监督是治理的重要保障"; modalSummary = "全面从严治党必须依靠制度、依靠监督。制度不能只是写在纸上，更要落实到行动中，让权力受到约束，让责任真正落地。"; break;
+            }
+            document.getElementById("modalTitle").innerText = modalTitle;
+            document.getElementById("modalText").innerText = modalSummary;
+            const modalBtn = document.getElementById("modalNextBtn");
+            // 移除原有监听重新添加
+            const newBtn = modalBtn.cloneNode(true);
+            modalBtn.parentNode.replaceChild(newBtn, modalBtn);
+            newBtn.addEventListener('click', () => {
+                document.getElementById("summaryModal").classList.remove("active");
+                isWaitingForModal = false;
+                if (levelIdx === 3) {
+                    // 进入结果页
+                    showResultPage();
+                } else {
+                    // 进入下一关
+                    goToLevel(levelIdx + 1);
+                }
+            });
+            document.getElementById("summaryModal").classList.add("active");
+        }
+    }
+
+    function goToLevel(levelIdx) {
+        currentLevelIdx = levelIdx;
+        hideAllPages();
+        const levelDiv = document.getElementById(`level-${levelIdx+1}`);
+        levelDiv.classList.add("active-page");
+        currentPage = `level-${levelIdx+1}`;
+        renderLevel(levelIdx);
+        updateGlobalScoreDisplay();
+    }
+
+    // 结果页展示
+    function showResultPage() {
+        hideAllPages();
+        document.getElementById("result-page").classList.add("active-page");
+        currentPage = "result-page";
+        // 动画展示总分
+        const finalScore = totalScore;
+        let correctTotal = correctRiskCount;
+        let wrongTotal = wrongClickCount;
+        let levelText = "";
+        if (finalScore >= 140) levelText = "清风守护者";
+        else if (finalScore >= 110) levelText = "纪律学习者";
+        else if (finalScore >= 80) levelText = "风险观察员";
+        else levelText = "继续学习中";
+        let commentStr = "";
+        if (finalScore >= 140) commentStr = "你对廉政风险具有较强的识别能力，能够准确发现隐藏在细节中的风险点。";
+        else if (finalScore >= 110) commentStr = "你已经掌握了大部分风险识别方法，但仍需继续增强纪律意识和制度意识。";
+        else if (finalScore >= 80) commentStr = "你能够发现部分廉政风险，但对一些隐蔽性问题还需要进一步学习。";
+        else commentStr = "廉政风险识别需要不断积累和反思，请结合课堂内容继续学习。";
+        
+        const resultHtml = `<p>🎯 总分：<strong style="font-size:2rem;">${finalScore}</strong> / 160</p>
+                            <p>✅ 正确排雷数量：${correctTotal} / 16</p>
+                            <p>⚠️ 误点次数：${wrongTotal}</p>
+                            <p>🏅 学习评价：${levelText}</p>`;
+        document.getElementById("resultStats").innerHTML = resultHtml;
+        document.getElementById("finalComment").innerHTML = `<strong>${commentStr}</strong><br/>全面从严治党不是一阵风，而是一项长期任务。只有坚持自我净化、自我完善、自我革新、自我提高，才能不断增强党的创造力、凝聚力和战斗力。`;
+        // 隐藏回顾区域
+        document.getElementById("reviewContainer").style.display = "none";
+        // 分数数字动画（简单增量）
+        animateNumber();
+    }
+
+    function animateNumber() { /* 已有分数直接展示，无需复杂动画 */ }
+    function updateGlobalScoreDisplay() {
+        const disp = document.getElementById("globalScoreDisplay");
+        if(disp) disp.innerText = `总分: ${totalScore}`;
+    }
+    function showToast(msg, duration) {
+        const toast = document.getElementById("toastMsg");
+        toast.innerText = msg;
+        toast.style.opacity = "1";
+        setTimeout(() => { toast.style.opacity = "0"; }, duration);
+    }
+    function hideAllPages() {
+        const pages = ["start-page", "rules-page", "level-1", "level-2", "level-3", "level-4", "result-page"];
+        pages.forEach(pid => {
+            const el = document.getElementById(pid);
+            if(el) el.classList.remove("active-page");
+        });
+    }
+    // 重置游戏
+    function resetAndRestart() {
+        initGameState();
+        levelCompletedFlag = [false, false, false, false];
+        isWaitingForModal = false;
+        totalScore = 0;
+        correctRiskCount = 0;
+        wrongClickCount = 0;
+        updateGlobalScoreDisplay();
+        hideAllPages();
+        document.getElementById("start-page").classList.add("active-page");
+        currentPage = "start-page";
+        if(document.getElementById("summaryModal").classList.contains("active")) document.getElementById("summaryModal").classList.remove("active");
+    }
+    // 风险回顾
+    function showRiskReview() {
+        const container = document.getElementById("reviewContainer");
+        container.style.display = "block";
+        let html = `<h3 style="color:#b33716;">📖 廉政风险点解析</h3>`;
+        for(let lv=0; lv<4; lv++) {
+            html += `<div style="margin-bottom:18px;"><strong style="font-size:1.1rem;">${levelsData[lv].name}</strong>`;
+            const cards = levelsData[lv].cards;
+            cards.forEach((c,idx) => {
+                if(c.isRisk) {
+                    html += `<div class="review-item"><span style="font-weight:bold;">⚠️ ${c.text}</span><br/><span style="color:#7a3a1a;">✍️ ${c.explanation}</span></div>`;
+                }
+            });
+            html += `</div>`;
+        }
+        container.innerHTML = html;
+    }
+
+    // 事件绑定及页面跳转
+    document.getElementById("startBtn").onclick = () => {
+        hideAllPages();
+        document.getElementById("rules-page").classList.add("active-page");
+        currentPage = "rules-page";
+    };
+    document.getElementById("toLevel1Btn").onclick = () => {
+        initGameState(); // 全新开始
+        goToLevel(0);
+    };
+    document.getElementById("restartBtn").onclick = () => { resetAndRestart(); };
+    document.getElementById("reviewRiskBtn").onclick = () => { showRiskReview(); };
+    // 初始化显示首页
+    initGameState();
+    // 预置关闭模态框点击背景关闭功能（避免误触）
+    window.onclick = function(e) { if(e.target === document.getElementById("summaryModal")) { if(!isWaitingForModal) return; } };
+</script>
+</body>
+</html>
